@@ -1,3 +1,2 @@
 streamlit
 torch
-torch.nn.functional
