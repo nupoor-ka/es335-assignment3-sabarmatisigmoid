@@ -10,7 +10,7 @@ from pprint import pprint # pretty print
 # Title of the app
 st.title("Parameter Selection and Text Input App")
 class NextWord(nn.Module):
-  def __init__(self, block_size, vocab_size, emb_dim, hidden_size): # init method defines the architecture of the neural network
+  def __init__(self, block_size, vocab_size, emb_dim, hidden_size,num_layers=3): # init method defines the architecture of the neural network
     super().__init__() # calls the superclass and its constructor
     self.emb = nn.Embedding(vocab_size, emb_dim) # embedding layer
     self.layers = nn.ModuleList() # list of layers
@@ -44,8 +44,8 @@ with open('streamlit_app/word2int.pkl', 'rb') as f:
     word2int = pickle.load(f)
 
 num_layers=10
-def load_model(Emb_dim,context,af,rsd):
-    model = NextWord(context, len(word2int), Emb_dim, 1024, num_layers)
+def load_model(Emb_dim,context,af,rsd,num_layers=3):
+    model = NextWord(context, len(word2int), Emb_dim, 1024,num_layers)
     path=f"streamlit_app/model_{Emb_dim}_{context}_{af}_{rsd}.pth"
     model.load_state_dict(torch.load(path, map_location = torch.device("cpu")))
     model.eval()
@@ -106,7 +106,7 @@ rsd = st.selectbox(
 
 num_words = st.number_input("Number of words to predict:", min_value=1, value=1000)
 
-model=load_model(Emb_dim,Context,af,rsd)
+model=load_model(Emb_dim,Context,af,rsd,num_layers=3)
 input_test=set_context(x_test,Context)
 output=generate_text(model, int2word, num_words , input_test)
 
