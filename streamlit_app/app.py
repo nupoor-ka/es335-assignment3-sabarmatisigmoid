@@ -9,6 +9,14 @@ import pickle
 from pprint import pprint # pretty print
 # Title of the app
 st.title("Parameter Selection and Text Input App")
+
+with open('streamlit_app/int2word.pkl', 'rb') as f:
+    int2word = pickle.load(f)
+
+with open('streamlit_app/word2int.pkl', 'rb') as f:
+    word2int = pickle.load(f)
+
+
 class NextWord(nn.Module):
   def __init__(self, block_size, vocab_size, emb_dim, hidden_size,num_layers=3): # init method defines the architecture of the neural network
     super().__init__() # calls the superclass and its constructor
@@ -37,11 +45,6 @@ class NextWord(nn.Module):
     return x
 
 
-with open('streamlit_app/int2word.pkl', 'rb') as f:
-    int2word = pickle.load(f)
-
-with open('streamlit_app/word2int.pkl', 'rb') as f:
-    word2int = pickle.load(f)
 
 num_layers=10
 def load_model(Emb_dim,context,af,rsd,num_layers=3):
@@ -64,13 +67,14 @@ def set_context(x_text,Context):
     return inp_num
 
 def generate_text(model, int2word, num_words , context):
+    
     gen_text = ''
     text_len = 0
     while text_len < num_words:
-      x = torch.tensor(context).view(1, -1)
+      x = torch.tensor(context, dtype = torch.long).view(1, -1)
       y_pred = model(x)
       ix = torch.distributions.categorical.Categorical(logits=y_pred).sample().item()
-      wor = int2word[ix]
+      wor = int2word[ix.item()]
       gen_text += wor + ' '
       context = context[1:] + [ix]
       if wor!='.':
