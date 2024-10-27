@@ -9,23 +9,32 @@ import pickle
 from pprint import pprint # pretty print
 # Title of the app
 st.title("Parameter Selection and Text Input App")
-class Nextword(nn.Module):
-    def __init__(self, block_size, vocab_size, emb_dim, hidden_size, number_layers):
-        super().__init__()
-        self.emb = nn.Embedding(vocab_size, emb_dim)
-        self.layers = nn.ModuleList()
-        self.layers.append(nn.Linear(block_size * emb_dim, hidden_size))
-        for i in range(number_layers):
-            self.layers.append(nn.Linear(hidden_size, hidden_size))
-        self.layers.append(nn.Linear(hidden_size, vocab_size))
+class NextWord(nn.Module):
+  def __init__(self, block_size, vocab_size, emb_dim, hidden_size): # init method defines the architecture of the neural network
+    super().__init__() # calls the superclass and its constructor
+    self.emb = nn.Embedding(vocab_size, emb_dim) # embedding layer
+    self.layers = nn.ModuleList() # list of layers
+    self.layers.append(nn.Linear(block_size * emb_dim, hidden_size)) # first layer, maps from (block_size * emb_dim) neurons to (hidden_size) neurons
+    # for layer in range(num_layers): # creating hidden layers
+    #   self.layers.append(nn.Linear(hidden_size, hidden_size)) # hidden layers
+    for i in range(num_layers): # creating hidden layers
+      self.layers.append(nn.Linear(int(hidden_size/(2**i)), int(hidden_size/(2**(i+1)))))
+    self.layers.append(nn.Linear(int(hidden_size/(2**num_layers)), vocab_size)) # output layer
+    if af == 'ReLU':
+        activation = nn.ReLU()
+        self.activation = activation # activation function
+    elif af == 'Sin':
+        activation = lambda x: torch.sin(x)
+        self.activation = activation # activation function
+    
 
-    def forward(self, x):
-        x = self.emb(x)
-        x = x.view(x.size(0), -1)
-        for l in self.layers:
-            x = l(x)
-            x = nn.ReLU()(x)
-        return x
+  def forward(self, x):
+    x = self.emb(x) # embedding layer
+    x = x.view(x.shape[0], -1) # flatten the embedding layer
+    for layer in self.layers: # passing through the layers
+      x = layer(x)
+      x = self.activation(x)
+    return x
 
 
 with open('streamlit_app/int2word.pkl', 'rb') as f:
@@ -36,7 +45,7 @@ with open('streamlit_app/word2int.pkl', 'rb') as f:
 
 num_layers=10
 def load_model(Emb_dim,context,af,rsd):
-    model = Nextword(context, len(word2int), Emb_dim, 1024, num_layers)
+    model = NextWord(context, len(word2int), Emb_dim, 1024, num_layers)
     path=f"streamlit_app/model_{Emb_dim}_{context}_{af}_{rsd}.pth"
     model.load_state_dict(torch.load(path, map_location = torch.device("cpu")))
     model.eval()
