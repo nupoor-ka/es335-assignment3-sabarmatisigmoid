@@ -46,7 +46,7 @@ class NextWord(nn.Module):
 
 
 
-num_layers=10
+num_layers=3
 def load_model(Emb_dim,context,af,rsd,num_layers=3):
     model = NextWord(context, len(word2int), Emb_dim, 1024,num_layers)
     path=f"streamlit_app/model_{Emb_dim}_{context}_{af}_{rsd}.pth"
@@ -54,17 +54,19 @@ def load_model(Emb_dim,context,af,rsd,num_layers=3):
     model.eval()
     return model
 
-def set_context(x_text,Context):
-    x_l = x_text.split()
-    inp_con = x_l[-Context:]
-    inp_num=[]
-    for i in  inp_con:
-        if i not in word2int.keys():
-            num=18335
-        else:
-            num=word2int[i]
-        inp_num.append(num)
-    return inp_num
+def set_context(x_text, Context):
+  input_words = x_text.split()
+  if len(input_words) < Context:
+    input_words = [0] * (Context - len(input_words)) + input_words
+  words_for_context = input_words[len(input_words)-Context:len(input_words)]
+  context = []
+  for word in words_for_context:
+    if word not in word2int.keys():
+      context.append(18335)
+    else:
+      context.append(word2int[word])
+  # context = [word2int[word] for word in words_for_context]
+  return context
 
 def generate_text(model, int2word, num_words , context):
     
@@ -74,7 +76,7 @@ def generate_text(model, int2word, num_words , context):
       x = torch.tensor(context, dtype = torch.long).view(1, -1)
       y_pred = model(x)
       ix = torch.distributions.categorical.Categorical(logits=y_pred).sample().item()
-      wor = int2word[ix.item()]
+      wor = int2word[ix]
       gen_text += wor + ' '
       context = context[1:] + [ix]
       if wor!='.':
