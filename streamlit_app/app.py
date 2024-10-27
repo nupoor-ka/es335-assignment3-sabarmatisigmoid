@@ -77,12 +77,12 @@ x_test = st.text_area("Enter the input text:", value="", height=150)
 # Dropdown (Selectbox) for Embedding Dimension selection
 Emb_dim = st.selectbox(
     "Select an Embedding Dimension:",
-    ("32", "128")
+    [32, 128]
 )
 # Dropdown (Selectbox) for Context Length selection
 Context = st.selectbox(
     "Select a Context Length:",
-    ("4", "8")
+    [4, 8]
 )
 # Dropdown (Selectbox) for Activation Function selection
 af = st.selectbox(
@@ -92,7 +92,7 @@ af = st.selectbox(
 # Dropdown (Selectbox) for Context Length selection
 rsd = st.selectbox(
     "Select a Random Seed",
-    ("96", "42")
+    [96, 42]
 )
 
 num_words = st.number_input("Number of words to predict:", min_value=1, value=1000)
