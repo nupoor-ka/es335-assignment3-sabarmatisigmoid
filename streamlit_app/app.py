@@ -2,6 +2,7 @@ import streamlit as st
 import torch
 import torch.nn.functional as F
 from torch import nn
+import pickle
 
 # %matplotlib inline
 # %config InlineBackend.figure_format = 'retina' # to make graphs sharper
@@ -26,13 +27,48 @@ class Nextword(nn.Module):
             x = nn.ReLU()(x)
         return x
 
+
+with open('int2word.pkl', 'rb') as f:
+    int2word = pickle.load(f)
+
+with open('word2int.pkl', 'rb') as f:
+    word2int = pickle.load(f)
+
 num_layers=10
-def load_model(Emb_dim,cotext,af,rsd):
-    model = Nextword(Context, len(wtoi), Emb_dim, 1024, num_layers)
-    path=f"'/Users/pranavthakkar/Desktop/Ml_3/model_{Emb_dim}_{Context}_{af}_{rsd}.pth'"
+def load_model(Emb_dim,context,af,rsd):
+    model = Nextword(Context, len(word2int), Emb_dim, 1024, num_layers)
+    path=f"streamlit_app/model_{Emb_dim}_{context}_{af}_{rsd}.pth"
     model.load_state_dict(torch.load(path))
     model.eval()
     return model
+
+def set_context(x_text,Context):
+    x_l = x_text.split()
+    inp_con = x_l[-Context:]
+    inp_num=[]
+    for i in  inp_con:
+        if i not in word2int.keys():
+            num=18335
+        else:
+            num=word2int[i]
+        inp_num.append(num)
+    return inp_num
+
+def generate_text(model, int2word, num_words , context):
+    gen_text = ''
+    text_len = 0
+    while text_len < num_words:
+      x = torch.tensor(context).view(1, -1)
+      y_pred = model(x)
+      ix = torch.distributions.categorical.Categorical(logits=y_pred).sample().item()
+      wor = int2word[ix]
+      gen_text += wor + ' '
+      context = context[1:] + [ix]
+      if wor!='.':
+        text_len += 1
+
+    return gen_text
+
 
 
 #text box for user to input the text
@@ -40,17 +76,17 @@ x_test = st.text_area("Enter the input text:", value="", height=150)
 
 # Dropdown (Selectbox) for Embedding Dimension selection
 Emb_dim = st.selectbox(
-    "Select a Embedding Dimension:",
-    ("32", "64")
+    "Select an Embedding Dimension:",
+    ("32", "128")
 )
 # Dropdown (Selectbox) for Context Length selection
 Context = st.selectbox(
     "Select a Context Length:",
-    ("5", "7")
+    ("4", "8")
 )
 # Dropdown (Selectbox) for Activation Function selection
 af = st.selectbox(
-    "Select a Activation Function:",
+    "Select an Activation Function:",
     ("ReLU", "Sin")
 )
 # Dropdown (Selectbox) for Context Length selection
@@ -59,4 +95,12 @@ rsd = st.selectbox(
     ("96", "42")
 )
 
-k_words = st.number_input("Number of words to predict:", min_value=1, value=1000)
+num_words = st.number_input("Number of words to predict:", min_value=1, value=1000)
+
+model=load_model(Emb_dim,Context,af,rsd)
+input_test=set_context(x_test,Context)
+output=generate_text(model, int2word, num_words , input_test)
+
+if st.button('Predict'):
+    st.write(f"Predicted next word(s): {output}")
+
