@@ -36,7 +36,7 @@ with open('streamlit_app/word2int.pkl', 'rb') as f:
 
 num_layers=10
 def load_model(Emb_dim,context,af,rsd):
-    model = Nextword(Context, len(word2int), Emb_dim, 1024, num_layers)
+    model = Nextword(context, len(word2int), Emb_dim, 1024, num_layers)
     path=f"streamlit_app/model_{Emb_dim}_{context}_{af}_{rsd}.pth"
     model.load_state_dict(torch.load(path))
     model.eval()
