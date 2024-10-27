@@ -28,10 +28,10 @@ class Nextword(nn.Module):
         return x
 
 
-with open('int2word.pkl', 'rb') as f:
+with open('streamlit_app/int2word.pkl', 'rb') as f:
     int2word = pickle.load(f)
 
-with open('word2int.pkl', 'rb') as f:
+with open('streamlit_app/word2int.pkl', 'rb') as f:
     word2int = pickle.load(f)
 
 num_layers=10
