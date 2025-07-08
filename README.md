@@ -8,7 +8,7 @@ This repository contains experiments and implementations for three core componen
 
 This work was completed as part of the course **ES 335: Machine Learning** at **IIT Gandhinagar**, taught by **Prof. Nipun Batra**, during Oct–Nov 2024.
 
-Contributors: [Aryan Solanki](https://github.com/Aryan-IIT), [Nupoor Assudani](https://github.com/nupoor-ka), Pranav Thakkar, Rishabh Jogani
+Contributors: [Aryan Solanki](https://github.com/Aryan-IIT), [Nupoor Assudani](https://github.com/nupoor-ka), [Pranav Thakkar](https://github.com/Pranav4860), [Rishabh Jogani](https://github.com/rishabhh-7)
 
 ---
 
